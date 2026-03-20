@@ -1,6 +1,24 @@
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 {
+  imports = lib.optional (builtins.pathExists ./hardware-configuration.nix)
+    ./hardware-configuration.nix;
+
+  assertions = [
+    {
+      assertion = builtins.pathExists ./hardware-configuration.nix;
+      message = ''
+        Missing ./hardware-configuration.nix.
+
+        Generate it on the target machine with:
+          sudo nixos-generate-config --show-hardware-config > hardware-configuration.nix
+
+        Then rebuild with:
+          sudo nixos-rebuild switch --flake .#
+      '';
+    }
+  ];
+
   # nixos version
   system.stateVersion = "25.05";
 
