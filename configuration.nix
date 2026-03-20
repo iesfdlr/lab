@@ -62,4 +62,6 @@
 
   # sudo configuration
   security.sudo.wheelNeedsPassword = true;
+
+  nixpkgs.config.allowUnfree = true;
 }
