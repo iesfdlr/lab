@@ -1,10 +1,10 @@
-{ lib, stdenv, fetchurl, autoPatchelfHook, makeWrapper, wrapGAppsHook4
-, xdg-utils, alsa-lib, atk, at-spi2-atk, cairo, cups, dbus, expat
+{ lib, stdenv, fetchurl, autoPatchelfHook, makeWrapper, wrapGAppsHook
+, xdg-utils, alsa-lib, atk, at-spi2-atk, at-spi2-core, cairo, cups, dbus, expat
 , fontconfig, freetype, ffmpeg, gdk-pixbuf, glib, glib-networking
 , gsettings-desktop-schemas, gtk3, libdrm, libnotify, libsecret, libuuid
-, mesa, nspr, nss, pango, systemd, libx11, libxcomposite, libxdamage
+, mesa, nspr, nss, pango, systemd, udev, libx11, libxcomposite, libxdamage
 , libxext, libxfixes, libxrandr, libxrender, libxscrnsaver, libxtst
-, libxcb }:
+, libxcb, libxshmfence, libxkbcommon }:
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "learningml-desktop";
@@ -20,13 +20,14 @@ stdenv.mkDerivation (finalAttrs: {
   nativeBuildInputs = [
     autoPatchelfHook
     makeWrapper
-    wrapGAppsHook4
+    wrapGAppsHook
   ];
 
   buildInputs = [
     alsa-lib
     atk
     at-spi2-atk
+    at-spi2-core
     cairo
     cups
     dbus
@@ -47,6 +48,7 @@ stdenv.mkDerivation (finalAttrs: {
     nss
     pango
     systemd
+    udev
     xdg-utils
     libx11
     libxcomposite
@@ -58,6 +60,8 @@ stdenv.mkDerivation (finalAttrs: {
     libxscrnsaver
     libxtst
     libxcb
+    libxshmfence
+    libxkbcommon
   ];
 
   sourceRoot = ".";
@@ -85,7 +89,9 @@ stdenv.mkDerivation (finalAttrs: {
       $out/libexec/learningml-desktop/learningml-desktop \
       $out/bin/learningml-desktop \
       "''${gappsWrapperArgs[@]}" \
+      --add-flags "--ozone-platform-hint=auto" \
       --add-flags "--no-sandbox" \
+      --add-flags "--disable-gpu-sandbox" \
       --add-flags "--disable-gpu" \
       --add-flags "--disable-software-rasterizer"
 
