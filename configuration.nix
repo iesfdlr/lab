@@ -78,12 +78,27 @@ in
 
   services.pipewire.enable = true;
 
+  # using rootless docker to avoid literally giving out root access
+  virtualisation.docker = {
+    enable = false;
+
+    rootless = {
+      enable = true;
+      setSocketVariable = true;
+      # i'm not sure if i need this? it comes from the nix docs so
+      daemon.settings = {
+        dns = [ "1.1.1.1" "1.0.0.1" ];
+      };
+    };
+  };
+
   # user configuration
   users.users.${username} = {
     isNormalUser = true;
     extraGroups = [
       "networkmanager"
       "dialout" # arduino serial access
+      "docker"
     ];
     password = username;
   };
@@ -97,6 +112,7 @@ in
     vscode
     chromium
     jetbrains.pycharm
+    jetbrains.datagrip
     kdePackages.kdenlive
     postman
     gimp
@@ -104,7 +120,9 @@ in
     # using appimage because it seems to be one major version up
     cura-appimage
     arduino-ide
+    # from local repo
     learningml-desktop
+    wireshark
 
     # python stuff goes here
     (python314.withPackages (ps: with ps; [
