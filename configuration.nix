@@ -35,7 +35,7 @@
   # kde plasma under x11
   services.xserver.enable = true;
   services.xserver.displayManager.sddm.enable = true;
-  services.xserver.desktopManager.defaultSession = "plasma";
+  # services.xserver.desktopManager.defaultSession = "plasma";
   services.xserver.desktopManager.plasma6.enable = true;
 
   services.xserver.desktopManager.plasma6.extraSessionCommands = ''
@@ -73,7 +73,7 @@
     freecad
     # using appimage because it seems to be one major version up
     cura-appimage
-    
+
 
     # python stuff goes here
     (python314.withPackages (ps: with ps; [
