@@ -64,9 +64,25 @@
     firefox
     git
     vim
-    python3
     vscode
     chromium
+    jetbrains.pycharm
+    kdePackages.kdenlive
+    postman
+    gimp
+    freecad
+    # using appimage because it seems to be one major version up
+    cura-appimage
+    
+
+    # python stuff goes here
+    (python314.withPackages (ps: with ps; [
+      numpy
+      pandas
+      matplotlib
+      scipy
+      jupyter
+    ]))
   ];
 
   # sudo configuration
