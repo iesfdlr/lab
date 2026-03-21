@@ -4,7 +4,7 @@
 , gsettings-desktop-schemas, gtk3, libdrm, libnotify, libsecret, libuuid
 , mesa, nspr, nss, pango, systemd, udev, libx11, libxcomposite, libxdamage
 , libxext, libxfixes, libxrandr, libxrender, libxscrnsaver, libxtst
-, libxcb, libxshmfence, libxkbcommon }:
+, libxcb, libxshmfence, libxkbcommon, libglvnd }:
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "learningml-desktop";
@@ -64,6 +64,12 @@ stdenv.mkDerivation (finalAttrs: {
     libxkbcommon
   ];
 
+  runtimeDependencies = [
+    (lib.getLib udev)
+    systemd
+    libglvnd
+  ];
+
   sourceRoot = ".";
 
   unpackPhase = ''
@@ -85,20 +91,27 @@ stdenv.mkDerivation (finalAttrs: {
       usr/share/applications/learningml-desktop.desktop \
       $out/share/applications/learningml-desktop.desktop
 
-    makeWrapper \
-      $out/libexec/learningml-desktop/learningml-desktop \
-      $out/bin/learningml-desktop \
-      "''${gappsWrapperArgs[@]}" \
-      --add-flags "--ozone-platform-hint=auto" \
-      --add-flags "--no-sandbox" \
-      --add-flags "--disable-gpu-sandbox" \
-      --add-flags "--disable-gpu" \
-      --add-flags "--disable-software-rasterizer"
-
     substituteInPlace $out/share/applications/learningml-desktop.desktop \
       --replace-fail "/opt/LearningMLDesktop/learningml-desktop" "$out/bin/learningml-desktop"
 
     runHook postInstall
+  '';
+
+  preFixup = ''
+    makeWrapper \
+      $out/libexec/learningml-desktop/learningml-desktop \
+      $out/bin/learningml-desktop \
+      "''${gappsWrapperArgs[@]}" \
+      --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [ udev systemd libglvnd ]}" \
+      --set ELECTRON_OZONE_PLATFORM_HINT auto \
+      --add-flags "--ozone-platform-hint=auto" \
+      --add-flags "--no-sandbox" \
+      --add-flags "--disable-gpu-sandbox" \
+      --add-flags "--disable-gpu" \
+      --add-flags "--disable-software-rasterizer" \
+      --add-flags "--disable-dev-shm-usage" \
+      --add-flags "--disable-crashpad" \
+      --add-flags "--disable-features=SpareRendererForSitePerProcess"
   '';
 
   meta = with lib; {
