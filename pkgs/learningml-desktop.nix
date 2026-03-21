@@ -31,6 +31,7 @@ stdenv.mkDerivation (finalAttrs: {
     expat
     fontconfig
     freetype
+    ffmpeg
     gdk-pixbuf
     glib
     glib-networking
