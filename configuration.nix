@@ -70,10 +70,10 @@ in
     '';
   };
   
-  services.logind.extraConfig = ''
-    IdleAction=poweroff
-    IdleActionSec=30min
-  '';
+  services.logind.settings.Login = {
+    IdleAction = "poweroff";
+    IdleActionSec = "30min";
+  };
 
   services.pipewire.enable = true;
 
