@@ -1,9 +1,8 @@
-# this file has been ai generated
-
 { lib, stdenv, fetchurl, autoPatchelfHook, makeWrapper, xdg-utils, alsa-lib
 , atk, at-spi2-atk, cairo, cups, dbus, expat, fontconfig, freetype
 , gdk-pixbuf, glib, gtk3, libdrm, libnotify, libsecret, libuuid, mesa, nspr
-, nss, pango, systemd, xorg }:
+, nss, pango, systemd, libx11, libxcomposite, libxdamage, libxext
+, libxfixes, libxrandr, libxrender, libxscrnsaver, libxtst, libxcb }:
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "learningml-desktop";
@@ -11,7 +10,7 @@ stdenv.mkDerivation (finalAttrs: {
 
   src = fetchurl {
     url = "https://github.com/LearningML-Education/learningml-desktop-releases/releases/download/${finalAttrs.version}/learningml-desktop_${finalAttrs.version}_amd64.deb";
-    hash = "sha256-08r5l5daq6nn3xqdaxfqvhs55dv398x43pd1nmblixd1pipgw767";
+    hash = "sha256-xxz+bryh9UhXtaHdQTpKY7dSNNzYddVwH9YarFqhJSM=";
   };
 
   nativeBuildInputs = [
@@ -42,16 +41,16 @@ stdenv.mkDerivation (finalAttrs: {
     pango
     systemd
     xdg-utils
-    xorg.libX11
-    xorg.libXcomposite
-    xorg.libXdamage
-    xorg.libXext
-    xorg.libXfixes
-    xorg.libXrandr
-    xorg.libXrender
-    xorg.libXScrnSaver
-    xorg.libXtst
-    xorg.libxcb
+    libx11
+    libxcomposite
+    libxdamage
+    libxext
+    libxfixes
+    libxrandr
+    libxrender
+    libxscrnsaver
+    libxtst
+    libxcb
   ];
 
   sourceRoot = ".";

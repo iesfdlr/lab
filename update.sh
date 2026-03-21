@@ -1,11 +1,8 @@
 #!/bin/bash
 
-echo "Actualizando el sistema..."
-git pull
+set -e
 
-if [ $? -ne 0 ]; then
-	echo "error al actualizar el repositorio, no se contunará."
-	exit 1
-fi
+echo "Actualizando el sistema..."
+git pull --rebase --autostash
 
 nixos-rebuild switch --flake path:.#nixos
