@@ -1,6 +1,6 @@
 { lib, stdenv, fetchurl, autoPatchelfHook, makeWrapper, wrapGAppsHook4
 , xdg-utils, alsa-lib, atk, at-spi2-atk, cairo, cups, dbus, expat
-, fontconfig, freetype, gdk-pixbuf, glib, glib-networking
+, fontconfig, freetype, ffmpeg, gdk-pixbuf, glib, glib-networking
 , gsettings-desktop-schemas, gtk3, libdrm, libnotify, libsecret, libuuid
 , mesa, nspr, nss, pango, systemd, libx11, libxcomposite, libxdamage
 , libxext, libxfixes, libxrandr, libxrender, libxscrnsaver, libxtst
