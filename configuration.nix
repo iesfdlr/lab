@@ -1,8 +1,15 @@
 { config, lib, pkgs, ... }:
 
+let
+  username = "usuario";
+in
 {
-  imports = lib.optional (builtins.pathExists ./hardware-configuration.nix)
-    ./hardware-configuration.nix;
+  imports =
+    lib.optional (builtins.pathExists ./hardware-configuration.nix)
+      ./hardware-configuration.nix
+    ++ [
+      (import ./locale-es.nix { inherit lib username; })
+    ];
 
   assertions = [
     {
@@ -47,17 +54,13 @@
     kwriteconfig5 --file kwinrc --group Compositing --key AnimationSpeed 2
   '';
 
-  # spanish stuff
-  services.xserver.xkb.layout = "es";
-  i18n.defaultLocale = "es_ES.UTF-8";
-
   services.pipewire.enable = true;
 
   # user configuration
-  users.users.usuario = {
+  users.users.${username} = {
     isNormalUser = true;
     extraGroups = [ "networkmanager" ];
-    password = "usuario";
+    password = username;
   };
   users.users.root.initialPassword = "toor";
 
