@@ -1,8 +1,10 @@
-{ lib, stdenv, fetchurl, autoPatchelfHook, makeWrapper, xdg-utils, alsa-lib
-, atk, at-spi2-atk, cairo, cups, dbus, expat, fontconfig, freetype
-, gdk-pixbuf, glib, gtk3, libdrm, libnotify, libsecret, libuuid, mesa, nspr
-, nss, pango, systemd, libx11, libxcomposite, libxdamage, libxext
-, libxfixes, libxrandr, libxrender, libxscrnsaver, libxtst, libxcb }:
+{ lib, stdenv, fetchurl, autoPatchelfHook, makeWrapper, wrapGAppsHook4
+, xdg-utils, alsa-lib, atk, at-spi2-atk, cairo, cups, dbus, expat
+, fontconfig, freetype, gdk-pixbuf, glib, glib-networking
+, gsettings-desktop-schemas, gtk3, libdrm, libnotify, libsecret, libuuid
+, mesa, nspr, nss, pango, systemd, libx11, libxcomposite, libxdamage
+, libxext, libxfixes, libxrandr, libxrender, libxscrnsaver, libxtst
+, libxcb }:
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "learningml-desktop";
@@ -16,6 +18,7 @@ stdenv.mkDerivation (finalAttrs: {
   nativeBuildInputs = [
     autoPatchelfHook
     makeWrapper
+    wrapGAppsHook4
   ];
 
   buildInputs = [
@@ -30,6 +33,8 @@ stdenv.mkDerivation (finalAttrs: {
     freetype
     gdk-pixbuf
     glib
+    glib-networking
+    gsettings-desktop-schemas
     gtk3
     libdrm
     libnotify
@@ -77,7 +82,10 @@ stdenv.mkDerivation (finalAttrs: {
     makeWrapper \
       $out/libexec/learningml-desktop/learningml-desktop \
       $out/bin/learningml-desktop \
-      --add-flags "--no-sandbox"
+      "''${gappsWrapperArgs[@]}" \
+      --add-flags "--no-sandbox" \
+      --add-flags "--disable-gpu" \
+      --add-flags "--disable-software-rasterizer"
 
     substituteInPlace $out/share/applications/learningml-desktop.desktop \
       --replace-fail "/opt/LearningMLDesktop/learningml-desktop" "$out/bin/learningml-desktop"
