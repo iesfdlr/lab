@@ -10,6 +10,8 @@ stdenv.mkDerivation (finalAttrs: {
   pname = "learningml-desktop";
   version = "1.4.3";
 
+  dontWrapGApps = true;
+
   src = fetchurl {
     url = "https://github.com/LearningML-Education/learningml-desktop-releases/releases/download/${finalAttrs.version}/learningml-desktop_${finalAttrs.version}_amd64.deb";
     hash = "sha256-xxz+bryh9UhXtaHdQTpKY7dSNNzYddVwH9YarFqhJSM=";
@@ -31,7 +33,6 @@ stdenv.mkDerivation (finalAttrs: {
     expat
     fontconfig
     freetype
-    ffmpeg
     gdk-pixbuf
     glib
     glib-networking
