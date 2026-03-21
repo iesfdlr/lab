@@ -2,6 +2,14 @@
 
 let
   username = "usuario";
+  kdeKioskLockdown = ''
+    [KDE Action Restrictions][$i]
+    action/configdesktop=false
+    plasma/allow_configure_when_locked=false
+    plasma/containment_actions=false
+    plasma/plasmashell/unlockedDesktop=false
+    ghns=false
+  '';
 in
 {
   imports =
@@ -54,6 +62,9 @@ in
     kwriteconfig5 --file kwinrc --group Compositing --key AnimationSpeed 2
   '';
 
+  # lock down plasma desktop for the user
+  environment.etc."xdg/kdeglobals".text = kdeKioskLockdown;
+
   services.pipewire.enable = true;
 
   # user configuration
@@ -82,7 +93,6 @@ in
     # using appimage because it seems to be one major version up
     cura-appimage
     arduino-ide
-
 
     # python stuff goes here
     (python314.withPackages (ps: with ps; [
