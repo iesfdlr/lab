@@ -39,7 +39,7 @@ in
   # timezone
   time.timeZone = "Europe/Madrid";
 
-  # kde plasma under x11
+  # BELOW IS THE KDE PLASMA CONFIG ZONE
   services.xserver.enable = true;
   services.displayManager.sddm.enable = true;
   # services.xserver.desktopManager.defaultSession = "plasma";
@@ -54,7 +54,7 @@ in
     kwriteconfig5 --file kwinrc --group Compositing --key AnimationSpeed 2
   '';
 
-  # lock down plasma desktop for the user
+  # kde kiosk configs + disable wallpaper configuration for all users
   environment.etc = {
     "xdg/kdeglobals".text = ''
       [KDE Action Restrictions][$i]
@@ -69,6 +69,11 @@ in
       kcm_wallpaper=false
     '';
   };
+  
+  services.logind.extraConfig = ''
+    IdleAction=poweroff
+    IdleActionSec=30min
+  '';
 
   services.pipewire.enable = true;
 
