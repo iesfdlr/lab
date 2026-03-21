@@ -2,14 +2,6 @@
 
 let
   username = "usuario";
-  kdeKioskLockdown = ''
-    [KDE Action Restrictions][$i]
-    action/configdesktop=false
-    plasma/allow_configure_when_locked=false
-    plasma/containment_actions=false
-    plasma/plasmashell/unlockedDesktop=false
-    ghns=false
-  '';
 in
 {
   imports =
@@ -63,7 +55,20 @@ in
   '';
 
   # lock down plasma desktop for the user
-  environment.etc."xdg/kdeglobals".text = kdeKioskLockdown;
+  environment.etc = {
+    "xdg/kdeglobals".text = ''
+      [KDE Action Restrictions][$i]
+      action/configdesktop=false
+      plasma/allow_configure_when_locked=false
+      plasma/plasmashell/unlockedDesktop=false
+      ghns=false
+    '';
+
+    "kde5rc".text = ''
+      [KDE Control Module Restrictions][$i]
+      kcm_wallpaper=false
+    '';
+  };
 
   services.pipewire.enable = true;
 
