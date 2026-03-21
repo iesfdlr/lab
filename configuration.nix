@@ -47,8 +47,9 @@
     kwriteconfig5 --file kwinrc --group Compositing --key AnimationSpeed 2
   '';
 
-  # spanish keyboard layout
+  # spanish stuff
   services.xserver.xkb.layout = "es";
+  i18n.defaultLocale = "es_ES.UTF-8";
 
   services.pipewire.enable = true;
 
@@ -63,6 +64,7 @@
   environment.systemPackages = with pkgs; [
     firefox
     git
+    gh
     vim
     vscode
     chromium
