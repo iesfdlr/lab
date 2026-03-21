@@ -1,4 +1,4 @@
-{ lib, stdenv, fetchurl, autoPatchelfHook, makeWrapper, wrapGAppsHook
+{ lib, stdenv, fetchurl, autoPatchelfHook, makeWrapper, wrapGAppsHook3
 , xdg-utils, alsa-lib, atk, at-spi2-atk, at-spi2-core, cairo, cups, dbus, expat
 , fontconfig, freetype, ffmpeg, gdk-pixbuf, glib, glib-networking
 , gsettings-desktop-schemas, gtk3, libdrm, libnotify, libsecret, libuuid
@@ -20,7 +20,7 @@ stdenv.mkDerivation (finalAttrs: {
   nativeBuildInputs = [
     autoPatchelfHook
     makeWrapper
-    wrapGAppsHook
+    wrapGAppsHook3
   ];
 
   buildInputs = [
