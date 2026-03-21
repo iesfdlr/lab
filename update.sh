@@ -1,16 +1,60 @@
 #!/bin/bash
 
-set -e
+set -euo pipefail
+
+cd "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+timestamp="$(date +%Y%m%d-%H%M%S)"
+log_dir="/var/log/lab-updates"
+mkdir -p "$log_dir" 2>/dev/null || log_dir="${XDG_STATE_HOME:-$HOME/.local/state}/lab-updates"
+mkdir -p "$log_dir"
+
+log_file="$log_dir/update-$timestamp.log"
+exec > >(tee -a "$log_file") 2>&1
+
+notify() {
+  local title="$1"
+  local message="$2"
+  local mode="${3:-info}"
+
+  if command -v kdialog >/dev/null 2>&1 && { [ -n "${DISPLAY:-}" ] || [ -n "${WAYLAND_DISPLAY:-}" ]; }; then
+    case "$mode" in
+      reboot)
+        if kdialog \
+          --title "$title" \
+          --yes-label "Reiniciar ahora" \
+          --no-label "Más tarde" \
+          --yesno "$message\n\nRegistro: $log_file"; then
+          systemctl reboot
+        fi
+        ;;
+      error)
+        kdialog --title "$title" --error "$message\n\nRegistro:\n$log_file"
+        ;;
+      *)
+        kdialog --title "$title" --passivepopup "$message\n\nRegistro: $log_file" 10
+        ;;
+    esac
+  elif command -v notify-send >/dev/null 2>&1; then
+    notify-send "$title" "$message\nRegistro: $log_file"
+  fi
+}
+
+trap 'code=$?; [ "$code" -eq 0 ] || notify "Actualizacion fallida" "La actualizacion ha fallado (codigo $code)." error' EXIT
 
 echo "Actualizando el sistema..."
+echo "Guardando registro en: $log_file"
+
 old_rev="$(git rev-parse HEAD)"
 git pull --rebase --autostash
-
 new_rev="$(git rev-parse HEAD)"
 
-if [ "$old_rev" != "$new_rev" ]; then
-  echo "Hay cambios nuevos en el repositorio. Construyendo el sistema..."
-  nixos-rebuild switch --flake path:.#nixos
-else
+if [ "$old_rev" = "$new_rev" ]; then
   echo "No hay cambios nuevos en el repositorio. Omitiendo nixos-rebuild."
+  notify "Actualizacion completada" "No habia cambios nuevos. El sistema ya estaba actualizado."
+  exit 0
 fi
+
+echo "Hay cambios nuevos en el repositorio. Construyendo el sistema..."
+nixos-rebuild switch --flake path:.#nixos
+notify "Actualizacion completada" "La actualizacion del sistema ha terminado correctamente." reboot
