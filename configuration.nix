@@ -38,7 +38,7 @@
   # services.xserver.desktopManager.defaultSession = "plasma";
   services.xserver.desktopManager.plasma6.enable = true;
 
-  services.xserver.desktopManager.plasma6.extraSessionCommands = ''
+  services.xserver.displayManager.sessionCommands = ''
     # disable heavy effects
     kwriteconfig5 --file kwinrc --group Plugins --key blurEnabled false
     kwriteconfig5 --file kwinrc --group Plugins --key contrastEnabled false
