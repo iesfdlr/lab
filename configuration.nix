@@ -59,7 +59,10 @@ in
   # user configuration
   users.users.${username} = {
     isNormalUser = true;
-    extraGroups = [ "networkmanager" ];
+    extraGroups = [
+      "networkmanager"
+      "dialout" # arduino serial access
+    ];
     password = username;
   };
   users.users.root.initialPassword = "toor";
@@ -78,6 +81,7 @@ in
     freecad
     # using appimage because it seems to be one major version up
     cura-appimage
+    arduino-ide
 
 
     # python stuff goes here
