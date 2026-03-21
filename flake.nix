@@ -1,7 +1,7 @@
 {
   description = "Config Lab Ordenadores [REDACTED]";
 
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
   outputs = { self, nixpkgs }: {
     nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {

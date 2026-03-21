@@ -19,12 +19,11 @@
     }
   ];
 
-  # nixos version
-  system.stateVersion = "25.05";
+  system.stateVersion = "25.11";
 
   # bootloader config stuff
   boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
+  boot.loader.timeout = 0;
 
   # networking
   # networking.hostName = "nixos";
@@ -33,10 +32,20 @@
   # timezone
   time.timeZone = "Europe/Madrid";
 
-  # xfce, x11...
+  # kde plasma under x11
   services.xserver.enable = true;
-  services.xserver.displayManager.lightdm.enable = true;
-  services.xserver.desktopManager.xfce.enable = true;
+  services.xserver.displayManager.sddm.enable = true;
+  services.xserver.desktopManager.defaultSession = "plasma";
+  services.xserver.desktopManager.plasma6.enable = true;
+
+  services.xserver.desktopManager.plasma6.extraSessionCommands = ''
+    # disable heavy effects
+    kwriteconfig5 --file kwinrc --group Plugins --key blurEnabled false
+    kwriteconfig5 --file kwinrc --group Plugins --key contrastEnabled false
+
+    # reduce animations
+    kwriteconfig5 --file kwinrc --group Compositing --key AnimationSpeed 2
+  '';
 
   # spanish keyboard layout
   services.xserver.xkb.layout = "es";
