@@ -2,6 +2,7 @@
 
 let
   username = "usuario";
+  learningml-desktop = pkgs.callPackage ./pkgs/learningml-desktop.nix { };
 in
 {
   imports =
@@ -103,6 +104,7 @@ in
     # using appimage because it seems to be one major version up
     cura-appimage
     arduino-ide
+    learningml-desktop
 
     # python stuff goes here
     (python314.withPackages (ps: with ps; [

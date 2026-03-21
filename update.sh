@@ -8,4 +8,4 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-nixos-rebuild switch --flake .#
+nixos-rebuild switch --flake path:.#nixos
