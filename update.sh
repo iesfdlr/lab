@@ -4,6 +4,19 @@ set -euo pipefail
 
 cd "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+force_update=0
+for arg in "$@"; do
+  case "$arg" in
+    --force-update|-f)
+      force_update=1
+      ;;
+    *)
+      echo "Uso: $0 [--force-update|-f]" >&2
+      exit 1
+      ;;
+  esac
+done
+
 timestamp="$(date +%Y%m%d-%H%M%S)"
 log_dir="/var/log/lab-updates"
 mkdir -p "$log_dir" 2>/dev/null || log_dir="${XDG_STATE_HOME:-$HOME/.local/state}/lab-updates"
@@ -49,12 +62,17 @@ old_rev="$(git rev-parse HEAD)"
 git pull --rebase --autostash
 new_rev="$(git rev-parse HEAD)"
 
-if [ "$old_rev" = "$new_rev" ]; then
+if [ "$old_rev" = "$new_rev" ] && [ "$force_update" -eq 0 ]; then
   echo "No hay cambios nuevos en el repositorio. Omitiendo nixos-rebuild."
   notify "Actualizacion completada" "No habia cambios nuevos. El sistema ya estaba actualizado."
   exit 0
 fi
 
-echo "Hay cambios nuevos en el repositorio. Construyendo el sistema..."
+if [ "$force_update" -eq 1 ] && [ "$old_rev" = "$new_rev" ]; then
+  echo "No hay cambios nuevos en el repositorio, pero se ha solicitado --force-update."
+else
+  echo "Hay cambios nuevos en el repositorio. Construyendo el sistema..."
+fi
+
 nixos-rebuild switch --flake path:.#nixos
 notify "Actualizacion completada" "La actualizacion del sistema ha terminado correctamente." reboot
