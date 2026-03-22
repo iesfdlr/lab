@@ -228,13 +228,11 @@ in
       BlockAboutSupport             = true;
 
 	    # UI and Behavior
-	    DisplayMenuBar                = "never";
 	    DontCheckDefaultBrowser       = true;
 	    HardwareAcceleration          = false;
 	    OfferToSaveLogins             = false;
       # force private browsing mode
 	    PrivateBrowsingModeAvailability = 2;
-	    DefaultDownloadDirectory      = "${home}/Downloads";
 
       # Extensions
       ExtensionSettings = let
