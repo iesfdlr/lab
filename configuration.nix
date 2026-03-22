@@ -33,9 +33,31 @@ in
   ];
 
   system.stateVersion = "25.11";
+  nixpkgs.config.allowUnfree = true;
 
-  # bootloader config stuff
-  boot.loader.timeout = 0;
+  boot = {
+    plymouth = {
+      enable = true;
+      theme = "rings";
+      themePackages = with pkgs; [
+        # todo: change this to a good simple theme
+        (adi1090x-plymouth-themes.override {
+          selected_themes = [ "rings" ];
+        })
+      ];
+    };
+
+    # silent boot options
+    consoleLogLevel = 3;
+    initrd.verbose = false;
+    kernelParams = [
+      "quiet"
+      "udev.log_level=3"
+      "systemd.show_status=auto"
+    ];
+    # hide bootloader menu (can still be accessed by holding shift during boot)
+    loader.timeout = 0;
+  };
 
   # networking
   # networking.hostName = "nixos";
@@ -110,6 +132,7 @@ in
     };
   };
   
+  # todo: this doesnt actually work so we might just configure it thru kde
   services.logind.settings.Login = {
     IdleAction = "poweroff";
     IdleActionSec = "30min";
@@ -124,7 +147,7 @@ in
     rootless = {
       enable = true;
       setSocketVariable = true;
-      # i'm not sure if i need this? it comes from the nix docs so
+      # i'm not sure if we need this? it comes from the nix docs so
       daemon.settings = {
         dns = [ "1.1.1.1" "1.0.0.1" ];
       };
@@ -178,8 +201,6 @@ in
   # sudo configuration
   security.sudo.wheelNeedsPassword = true;
 
-  nixpkgs.config.allowUnfree = true;
-
   # timers and stuff
   systemd.timers.lab-updater = {
     wantedBy = [ "timers.target" ];
@@ -207,7 +228,6 @@ in
       Unit = "bye-descargas.service";
     };
   };
-
   systemd.services.bye-descargas = {
     description = "bye bye";
     serviceConfig = {
