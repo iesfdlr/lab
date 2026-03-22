@@ -359,10 +359,10 @@ in
   };
   systemd.services.lab-updater = {
     description = "actualizaciones automáticas del sistema";
-    path = with pkgs; [ git nix coreutils systemd util-linux libnotify config.system.build.nixos-rebuild ];
+    path = with pkgs; [ git nix coreutils systemd util-linux libnotify config.system.build.nixos-rebuild bash ];
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = "/etc/nixos/update.sh";
+      ExecStart = "${pkgs.bash}/bin/bash /etc/nixos/update.sh";
     };
   };
 
