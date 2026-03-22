@@ -97,11 +97,6 @@ in
       kcm_wallpaper=false
     '';
 
-    xdg.userDirs = {
-      enable = true;
-      createDirectories = true;
-    };
-
     # andared_corporativo network manager settings
     "NetworkManager/system-connections/Andared_Corporativo.nmconnection" = {
       mode = "0600";
@@ -135,6 +130,11 @@ in
         method=auto
       '';
     };
+  };
+
+  xdg.userDirs = {
+    enable = true;
+    createDirectories = true;
   };
   
   # todo: this doesnt actually work so we might just configure it thru kde
