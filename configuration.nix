@@ -142,4 +142,22 @@ in
   security.sudo.wheelNeedsPassword = true;
 
   nixpkgs.config.allowUnfree = true;
+
+  # timers and stuff
+  systemd.timers.lab-updater = {
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnBootSec = "15m";
+      OnUnitActiveSec = "15m";
+      Unit = "lab-updater.service";
+    };
+  };
+  systemd.services.lab-updater = {
+    description = "Automatic lab updates using update.sh";
+    path = with pkgs; [ git nix coreutils kdePackages.kdialog libnotify config.system.build.nixos-rebuild ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "/etc/nixos/update.sh";
+    };
+  };
 }
