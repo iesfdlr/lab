@@ -102,11 +102,6 @@ watch_log() {
 }
 
 start_update_and_watch() {
-  local before_latest=""
-  local start_ts=""
-  local pkexec_pid=""
-  local log=""
-
   if has_active_update; then
     watch_log
     return 0
@@ -117,43 +112,11 @@ start_update_and_watch() {
     exit 1
   fi
 
-  before_latest="$(latest_log || true)"
-  start_ts="$(date +%s)"
-
   echo "Solicitando permisos de administrador para iniciar la actualizacion..."
-  pkexec /etc/nixos/update.sh >/dev/null 2>&1 &
-  pkexec_pid="$!"
 
-  for _ in $(seq 1 180); do
-    if has_active_update; then
-      log="$(active_log || true)"
-      [ -n "$log" ] && break
-    fi
-
-    log="$(latest_log || true)"
-    if [ -n "$log" ] && [ "$log" != "$before_latest" ]; then
-      break
-    fi
-
-    if [ -n "$log" ] && [ "$(stat -c %Y "$log" 2>/dev/null || echo 0)" -ge "$start_ts" ]; then
-      break
-    fi
-
-    if [ ! -d "/proc/$pkexec_pid" ]; then
-      break
-    fi
-
-    sleep 1
-  done
-
-  if [ -z "$log" ]; then
-    wait "$pkexec_pid" || true
-    echo "No se ha podido encontrar el registro de la actualizacion."
-    exit 1
-  fi
-
-  echo "Siguiendo registro: $log"
-  tail -n 200 -F "$log"
+  # Run pkexec in the foreground so the user sees output directly from
+  # update.sh (which tees to both stdout and its own log file).
+  pkexec /etc/nixos/update.sh
 }
 
 usage() {
