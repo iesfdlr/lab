@@ -46,7 +46,8 @@ in
   # BELOW IS THE KDE PLASMA CONFIG ZONE
   services.xserver.enable = true;
   services.displayManager.sddm.enable = true;
-  # services.xserver.desktopManager.defaultSession = "plasma";
+  services.displayManager.defaultSession = "plasmax11";
+  services.displayManager.sddm.wayland.enable = false;
   services.desktopManager.plasma6.enable = true;
 
   services.xserver.displayManager.sessionCommands = ''
