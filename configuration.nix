@@ -97,6 +97,11 @@ in
       kcm_wallpaper=false
     '';
 
+    xdg.userDirs = {
+      enable = true;
+      createDirectories = true;
+    };
+
     # andared_corporativo network manager settings
     "NetworkManager/system-connections/Andared_Corporativo.nmconnection" = {
       mode = "0600";
@@ -167,7 +172,6 @@ in
   users.users.root.initialPassword = "toor";
 
   environment.systemPackages = with pkgs; [
-    firefox
     git
     gh
     vim
@@ -197,6 +201,11 @@ in
       jupyter
     ]))
   ];
+
+  programs.firefox = {
+    enable = true;
+    languagePacks = [ "es-ES" ];
+  };
 
   # sudo configuration
   security.sudo.wheelNeedsPassword = true;
