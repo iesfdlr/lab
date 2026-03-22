@@ -205,6 +205,10 @@ in
     wireshark
     andaredConnectScript
     xdg-user-dirs
+    libreoffice-qt
+    hunspell
+    hunspellDicts.es_ES
+    hyphenDicts.es_ES
 
     # python stuff goes here
     (python314.withPackages (ps: with ps; [
