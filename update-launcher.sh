@@ -43,10 +43,6 @@ main() {
     exit 1
   }
 
-  if "$monitor_bin" --has-active-update; then
-    open_terminal "$terminal" "$monitor_bin" --watch
-  fi
-
   if command -v kdialog >/dev/null 2>&1; then
     choice="$(
       kdialog \

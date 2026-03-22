@@ -219,7 +219,7 @@ in
     ];
     password = username;
   };
-  users.users.root.initialPassword = "toor";
+
 
   environment.systemPackages = with pkgs; [
     chromium

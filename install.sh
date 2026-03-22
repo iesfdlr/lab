@@ -28,9 +28,8 @@ By default the script will prompt for Andared Wi-Fi credentials.
 Press Enter on an empty username to skip.  Use --no-andared to
 suppress the prompt entirely.
 
-If a TTY is available, the installer will also offer to change the
-root password. Press Enter on an empty root password prompt to keep
-the default configured password.
+If a TTY is available, the installer will prompt you to set a root
+password. You must provide a root password to proceed with installation.
 EOF
 }
 
@@ -73,14 +72,14 @@ prompt_secret_confirm() {
 
   value="$(prompt_secret "$prompt")"
   if [ -z "$value" ]; then
-    printf '%s' ""
-    return 0
+    echo "La contraseña no puede estar vacía." >&2
+    return 1
   fi
 
   confirm="$(prompt_secret 'Repite la contraseña: ')"
   if [ "$value" != "$confirm" ]; then
     echo "Las contraseñas no coinciden." >&2
-    exit 1
+    return 1
   fi
 
   printf '%s' "$value"
@@ -388,9 +387,16 @@ main() {
     fi
   fi
 
-  if [ -z "$root_password" ] && [ -c /dev/tty ]; then
-    printf '\n' > /dev/tty
-    root_password="$(prompt_secret_confirm 'Contraseña root (Enter para mantener la predeterminada): ')"
+  if [ -z "$root_password" ]; then
+    if [ -c /dev/tty ]; then
+      printf '\n' > /dev/tty
+      while [ -z "$root_password" ]; do
+        root_password="$(prompt_secret_confirm 'Contraseña root (obligatoria): ')" || root_password=""
+      done
+    else
+      echo "Se requiere una contraseña root. Usa --root-password o ejecuta en una terminal." >&2
+      exit 1
+    fi
   fi
 
   cleanup_mounts
