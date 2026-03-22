@@ -152,11 +152,29 @@ in
     '';
   };
 
-  # todo: this doesnt actually work so we might just configure it thru kde
-  services.logind.settings.Login = {
-    IdleAction = "poweroff";
-    IdleActionSec = "30min";
-  };
+  # auto power-off after 30 minutes of inactivity
+  # logind IdleAction doesn't work reliably with KDE (powerdevil manages idle
+  # detection itself and doesn't always set the session IdleHint), so we
+  # configure it directly through KDE's powermanagementprofilesrc.
+  # source: https://nix-community.github.io/plasma-manager/options.xhtml (powerdevil options)
+  #         https://blogs.kde.org/2024/04/23/powerdevil-in-plasma-6.0-and-beyond/
+  #         KConfig suspendType values: 0=nothing, 1=sleep, 2=hibernate, 8=shutdown
+  environment.etc."xdg/powermanagementprofilesrc".text = ''
+    [AC][SuspendSession]
+    idleTime=1800000
+    suspendThenHibernate=false
+    suspendType=8
+
+    [Battery][SuspendSession]
+    idleTime=1800000
+    suspendThenHibernate=false
+    suspendType=8
+
+    [LowBattery][SuspendSession]
+    idleTime=1800000
+    suspendThenHibernate=false
+    suspendType=8
+  '';
 
   services.pipewire.enable = true;
 
@@ -282,6 +300,28 @@ in
 
   # sudo configuration
   security.sudo.wheelNeedsPassword = true;
+
+  # protect XDG user directories from being deleted by the user
+  # sticky bit (1) + root ownership means the user can create/delete their OWN
+  # files inside, but cannot delete or rename the directory itself.
+  # source: https://unix.stackexchange.com/questions/20104 (sticky bit approach)
+  #         man tmpfiles.d (systemd-tmpfiles rule format)
+  systemd.tmpfiles.rules =
+    let
+      # "d" = create directory, 1770 = rwxrwx--- + sticky bit
+      protect = dir: "d /home/${username}/${dir} 1770 root ${username} -";
+      xdgDirs = [
+        "Escritorio"
+        "Descargas"
+        "Documentos"
+        "Música"
+        "Imágenes"
+        "Vídeos"
+        "Plantillas"
+        "Público"
+      ];
+    in
+      map protect xdgDirs;
 
   # timers and stuff
   systemd.timers.lab-updater = {
