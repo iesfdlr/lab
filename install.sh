@@ -205,7 +205,7 @@ main() {
   write_install_local "$disk"
 
   echo "Installing NixOS from flake $flake_host..."
-  nixos-install --no-root-passwd --flake "$repo_dir#$flake_host"
+  nixos-install --no-root-passwd --flake "path:$repo_dir#$flake_host"
 
   echo
   echo "Installation complete."
