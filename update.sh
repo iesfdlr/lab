@@ -137,7 +137,7 @@ notify() {
   if command -v notify-send >/dev/null 2>&1; then
     run_in_desktop_session \
       notify-send \
-      --app-name="Actualizaciones del laboratorio" \
+      --app-name="Actualizaciones de la distribución" \
       --icon="system-software-update" \
       --urgency="$urgency" \
       -t 0 \

@@ -50,7 +50,7 @@ main() {
   if command -v kdialog >/dev/null 2>&1; then
     choice="$(
       kdialog \
-        --title "Actualizaciones del laboratorio" \
+        --title "Actualizaciones de la distribución" \
         --menu "Que quieres hacer?" \
         run "Ejecutar actualizacion y seguir registro" \
         watch "Ver el ultimo registro" \

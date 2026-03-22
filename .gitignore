@@ -1,3 +1,4 @@
 hardware-configuration.nix
 install-local.nix
 *.pdf
+install_pc.sh

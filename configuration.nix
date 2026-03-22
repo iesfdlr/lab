@@ -8,7 +8,7 @@ let
   labUpdateLauncher = pkgs.writeShellScriptBin "lab-update-launcher" (builtins.readFile ./update-launcher.sh);
   labUpdateDesktop = pkgs.makeDesktopItem {
     name = "lab-updates";
-    desktopName = "Actualizaciones del laboratorio";
+    desktopName = "Actualizaciones de la distribución";
     genericName = "Registro y lanzador de actualizaciones";
     comment = "Sigue la actualizacion activa, revisa registros o lanza una nueva actualizacion";
     exec = "lab-update-launcher";
@@ -96,6 +96,11 @@ in
 
   # kde kiosk configs + disable wallpaper configuration for all users
   environment.etc = {
+    "nixos/update.sh" = {
+      mode = "0755";
+      source = ./update.sh;
+    };
+
     "xdg/kdeglobals".text = ''
       [KDE Action Restrictions][$i]
       action/configdesktop=false
