@@ -2,7 +2,7 @@
 
 ## instalación
 
-Si el equipo que usas para instalar necesita Wi‑Fi corporativa antes de clonar este repo, conecta primero la ISO a `Andared_Corporativo` de forma temporal. En la guía adjunta aparecen los parámetros esperados para Linux/NetworkManager: SSID `Andared_Corporativo`, seguridad enterprise, autenticación con túnel y autenticación interna `GTC`, sin certificado CA.
+si el equipo que usas para instalar necesita Wi‑Fi corporativa antes de clonar este repo, conecta primero la ISO a `Andared_Corporativo` de forma temporal. en la guía adjunta aparecen los parámetros esperados para Linux/NetworkManager: SSID `Andared_Corporativo`, seguridad enterprise, autenticación con túnel y autenticación interna `GTC`, sin certificado CA.
 
 1. descarga la iso de [nixos mínima](https://nixos.org/download/#nixos-iso) y arranca el ordenador desde ella
 2. busca el disco duro en `lsblk`
