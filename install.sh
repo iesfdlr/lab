@@ -68,6 +68,7 @@ cleanup_mounts() {
 
 partition_disk() {
   local disk="$1"
+  local swap_start="-$swap_size"
 
   echo "Partitioning $disk..."
   wipefs -af "$disk"
@@ -76,13 +77,13 @@ partition_disk() {
     parted -s "$disk" mklabel gpt
     parted -s "$disk" mkpart ESP fat32 1MiB 512MiB
     parted -s "$disk" set 1 esp on
-    parted -s "$disk" mkpart root ext4 512MiB "-$swap_size"
-    parted -s "$disk" mkpart swap linux-swap "-$swap_size" 100%
+    parted -s -- "$disk" mkpart root ext4 512MiB "$swap_start"
+    parted -s -- "$disk" mkpart swap linux-swap "$swap_start" 100%
   else
     parted -s "$disk" mklabel msdos
-    parted -s "$disk" mkpart primary ext4 1MiB "-$swap_size"
+    parted -s -- "$disk" mkpart primary ext4 1MiB "$swap_start"
     parted -s "$disk" set 1 boot on
-    parted -s "$disk" mkpart primary linux-swap "-$swap_size" 100%
+    parted -s -- "$disk" mkpart primary linux-swap "$swap_start" 100%
   fi
 
   partprobe "$disk"
