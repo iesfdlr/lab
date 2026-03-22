@@ -45,11 +45,11 @@ notify() {
         kdialog --title "$title" --error "$message\n\nRegistro:\n$log_file"
         ;;
       *)
-        kdialog --title "$title" --passivepopup "$message\n\nRegistro: $log_file" 10
+        kdialog --title "$title" --msgbox "$message\n\nRegistro: $log_file"
         ;;
     esac
   elif command -v notify-send >/dev/null 2>&1; then
-    notify-send "$title" "$message\nRegistro: $log_file"
+    notify-send -t 0 --urgency=critical "$title" "$message\nRegistro: $log_file"
   fi
 }
 

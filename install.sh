@@ -22,7 +22,7 @@ EOF
 }
 
 require_root() {
-  if [ "${EUID}" -ne 0 ]; then
+  if [ "$(id -u)" -ne 0 ]; then
     echo "Run this script as root." >&2
     exit 1
   fi
@@ -189,6 +189,17 @@ main() {
     exit 1
   fi
 
+  if [ "$force" -eq 0 ]; then
+    echo
+    echo "WARNING: This will ERASE ALL DATA on $disk."
+    printf 'Type "yes" to continue: '
+    read -r confirm
+    if [ "$confirm" != "yes" ]; then
+      echo "Aborted." >&2
+      exit 1
+    fi
+  fi
+
   cleanup_mounts
   partition_disk "$disk"
   format_and_mount "$disk"
@@ -201,7 +212,12 @@ main() {
   run_git clone "$repo_url" "$repo_dir"
 
   echo "Generating machine-specific configuration..."
-  nixos-generate-config --root "$target_root"
+  local gen_dir
+  gen_dir="$(mktemp -d)"
+  nixos-generate-config --root "$target_root" --dir "$gen_dir"
+  cp "$gen_dir/hardware-configuration.nix" "$repo_dir/hardware-configuration.nix"
+  rm -rf "$gen_dir"
+
   write_install_local "$disk"
 
   echo "Installing NixOS from flake $flake_host..."
