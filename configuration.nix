@@ -6,8 +6,12 @@ let
 in
 {
   imports =
-    lib.optional (builtins.pathExists ./hardware-configuration.nix)
+    lib.optionals (builtins.pathExists ./hardware-configuration.nix) [
       ./hardware-configuration.nix
+    ]
+    ++ lib.optionals (builtins.pathExists ./install-local.nix) [
+      ./install-local.nix
+    ]
     ++ [
       (import ./locale-es.nix { inherit lib username; })
     ];
@@ -30,7 +34,6 @@ in
   system.stateVersion = "25.11";
 
   # bootloader config stuff
-  boot.loader.systemd-boot.enable = true;
   boot.loader.timeout = 0;
 
   # networking
