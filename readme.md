@@ -28,3 +28,10 @@ El sistema instalado deja preparada una conexión de NetworkManager para `Andare
 - En Plasma, basta con abrir el selector de redes, pulsar `Andared_Corporativo` e introducir las credenciales del usuario.
 - Alternativamente, desde terminal se puede usar `andared-connect` para que `nmcli` pida las credenciales de forma interactiva.
 - Si `TTLS` no funciona en un centro concreto, prueba `andared-connect peap`.
+
+## actualizaciones
+
+- Se puede seguir lanzando la actualización manual con `su -c /etc/nixos/update.sh`. El script ahora guarda un registro en `/var/log/lab-updates` y envía la notificación final a la sesión activa de KDE.
+- En el menú de aplicaciones de Plasma aparece `Actualizaciones del laboratorio`.
+- Si ya hay una actualización en marcha, el lanzador se engancha automáticamente a su registro activo.
+- Si no hay ninguna en curso, el lanzador permite iniciar una nueva actualización y seguir el registro, ver el último registro o abrir la carpeta con el historial.

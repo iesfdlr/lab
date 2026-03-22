@@ -4,6 +4,18 @@ let
   username = "usuario";
   learningml-desktop = pkgs.callPackage ./pkgs/learningml-desktop.nix { };
   andaredConnectScript = pkgs.writeShellScriptBin "andared-connect" (builtins.readFile ./andared-connect.sh);
+  labUpdateMonitor = pkgs.writeShellScriptBin "lab-update-monitor" (builtins.readFile ./update-monitor.sh);
+  labUpdateLauncher = pkgs.writeShellScriptBin "lab-update-launcher" (builtins.readFile ./update-launcher.sh);
+  labUpdateDesktop = pkgs.makeDesktopItem {
+    name = "lab-updates";
+    desktopName = "Actualizaciones del laboratorio";
+    genericName = "Registro y lanzador de actualizaciones";
+    comment = "Sigue la actualizacion activa, revisa registros o lanza una nueva actualizacion";
+    exec = "lab-update-launcher";
+    icon = "system-software-update";
+    terminal = false;
+    categories = [ "System" "Settings" ];
+  };
 in
 {
   imports =
@@ -222,7 +234,14 @@ in
     learningml-desktop
     wireshark
     andaredConnectScript
+    labUpdateMonitor
+    labUpdateLauncher
+    labUpdateDesktop
     xdg-user-dirs
+    libnotify
+    util-linux
+    kdePackages.kdialog
+    kdePackages.konsole
     libreoffice-qt
     hunspell
     hunspellDicts.es_ES
@@ -334,7 +353,7 @@ in
   };
   systemd.services.lab-updater = {
     description = "actualizaciones automáticas del sistema";
-    path = with pkgs; [ git nix coreutils kdePackages.kdialog libnotify config.system.build.nixos-rebuild ];
+    path = with pkgs; [ git nix coreutils systemd util-linux libnotify config.system.build.nixos-rebuild ];
     serviceConfig = {
       Type = "oneshot";
       ExecStart = "/etc/nixos/update.sh";
