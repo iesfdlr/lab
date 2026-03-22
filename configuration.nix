@@ -176,7 +176,6 @@ in
     gh
     vim
     vscode
-    chromium
     jetbrains.pycharm
     jetbrains.datagrip
     kdePackages.kdenlive
@@ -250,6 +249,17 @@ in
           private_browsing  = true;
         };
       };
+    };
+  };
+
+  programs.chromium = {
+    enable = true;
+    extensions = [
+      "ddkjiahejlhfcafbddmgiahcphecmpfh;https://clients2.google.com/service/update2/crx"
+    ];
+    extraOpts = {
+      # force incognito mode, source: https://chromeenterprise.google/policies/#IncognitoModeAvailability
+      IncognitoModeAvailability = 2;
     };
   };
 
