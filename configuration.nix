@@ -153,11 +153,29 @@ in
     };
   };
   systemd.services.lab-updater = {
-    description = "Automatic lab updates using update.sh";
+    description = "actualizaciones automáticas del sistema";
     path = with pkgs; [ git nix coreutils kdePackages.kdialog libnotify config.system.build.nixos-rebuild ];
     serviceConfig = {
       Type = "oneshot";
       ExecStart = "/etc/nixos/update.sh";
+    };
+  };
+
+  systemd.timers.bye-descargas = {
+    description = "limpia la carpeta de descargas semanalmente";
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnCalendar = "weekly";
+      Persistent = true;
+      Unit = "bye-descargas.service";
+    };
+  };
+
+  systemd.services.bye-descargas = {
+    description = "bye bye";
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${pkgs.findutils}/bin/find /home/usuario/Descargas -mindepth 1 -mtime +14 -delete";
     };
   };
 }

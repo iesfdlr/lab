@@ -4,6 +4,16 @@ set -euo pipefail
 
 cd "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# When running from a systemd timer/cron, set display variables
+# so that kdialog/notify-send can reach the X11 session.
+if [ -z "${DISPLAY:-}" ]; then
+  export DISPLAY=":0"
+  dbus_addr="$(systemctl --user show-environment 2>/dev/null | grep '^DBUS_SESSION_BUS_ADDRESS=' | cut -d= -f2-)" || true
+  if [ -n "${dbus_addr:-}" ]; then
+    export DBUS_SESSION_BUS_ADDRESS="$dbus_addr"
+  fi
+fi
+
 force_update=0
 for arg in "$@"; do
   case "$arg" in
