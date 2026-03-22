@@ -193,9 +193,15 @@ main() {
     echo
     echo "WARNING: This will ERASE ALL DATA on $disk."
     printf 'Type "yes" to continue: '
-    read -r confirm
+    # Use /dev/tty if available, otherwise fallback to stdin
+    if [ -c /dev/tty ]; then
+      read -r confirm < /dev/tty || confirm="no"
+    else
+      read -r confirm || confirm="no"
+    fi
+
     if [ "$confirm" != "yes" ]; then
-      echo "Aborted." >&2
+      echo "Aborted (confirmation failed or not in a terminal)." >&2
       exit 1
     fi
   fi
@@ -212,11 +218,7 @@ main() {
   run_git clone "$repo_url" "$repo_dir"
 
   echo "Generating machine-specific configuration..."
-  local gen_dir
-  gen_dir="$(mktemp -d)"
-  nixos-generate-config --root "$target_root" --dir "$gen_dir"
-  cp "$gen_dir/hardware-configuration.nix" "$repo_dir/hardware-configuration.nix"
-  rm -rf "$gen_dir"
+  nixos-generate-config --root "$target_root" --show-hardware-config > "$repo_dir/hardware-configuration.nix"
 
   write_install_local "$disk"
 
