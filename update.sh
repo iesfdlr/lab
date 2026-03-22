@@ -161,7 +161,6 @@ new_rev="$(git rev-parse HEAD)"
 
 if [ "$old_rev" = "$new_rev" ] && [ "$force_update" -eq 0 ]; then
   echo "No hay cambios nuevos en el repositorio. Omitiendo nixos-rebuild."
-  notify "Actualizacion completada" "No habia cambios nuevos. El sistema ya estaba actualizado."
   exit 0
 fi
 
