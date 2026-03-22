@@ -3,6 +3,7 @@
 let
   username = "usuario";
   learningml-desktop = pkgs.callPackage ./pkgs/learningml-desktop.nix { };
+  andaredConnectScript = pkgs.writeShellScriptBin "andared-connect" (builtins.readFile ./andared-connect.sh);
 in
 {
   imports =
@@ -73,6 +74,40 @@ in
       [KDE Control Module Restrictions][$i]
       kcm_wallpaper=false
     '';
+
+    # andared_corporativo network manager settings
+    "NetworkManager/system-connections/Andared_Corporativo.nmconnection" = {
+      mode = "0600";
+      text = ''
+        [connection]
+        id=Andared_Corporativo
+        uuid=9c4ef8e2-f9fc-4a33-b64b-cb79e5e2ca62
+        type=wifi
+        permissions=
+        autoconnect=false
+        autoconnect-priority=-1
+
+        [wifi]
+        mode=infrastructure
+        ssid=Andared_Corporativo
+
+        [wifi-security]
+        key-mgmt=wpa-eap
+
+        [802-1x]
+        eap=ttls;
+        phase2-auth=gtc
+        password-flags=2
+        system-ca-certs=false
+
+        [ipv4]
+        method=auto
+
+        [ipv6]
+        addr-gen-mode=default
+        method=auto
+      '';
+    };
   };
   
   services.logind.settings.Login = {
@@ -127,6 +162,7 @@ in
     # from local repo
     learningml-desktop
     wireshark
+    andaredConnectScript
 
     # python stuff goes here
     (python314.withPackages (ps: with ps; [

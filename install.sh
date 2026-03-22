@@ -10,14 +10,21 @@ swap_size="4GiB"
 
 usage() {
   cat <<'EOF'
-Usage: install.sh DISK [-f|--force] [--swap-size SIZE]
+Usage: install.sh DISK [-f|--force] [--swap-size SIZE] [--no-andared]
+                       [--andared-username USER] [--andared-password PASS]
 
 Examples:
   sudo ./install.sh /dev/nvme0n1
   sudo ./install.sh /dev/sda --swap-size 16GiB
+  sudo ./install.sh /dev/sda --no-andared
+  sudo ./install.sh /dev/sda --andared-username usuario --andared-password clave
 
 This script will erase the selected disk, partition it, format it,
 clone this repository into /etc/nixos, and install NixOS.
+
+By default the script will prompt for Andared Wi-Fi credentials.
+Press Enter on an empty username to skip.  Use --no-andared to
+suppress the prompt entirely.
 EOF
 }
 
@@ -34,6 +41,24 @@ run_git() {
   else
     nix-shell -p git --run "$(printf '%q ' git "$@")"
   fi
+}
+
+prompt_secret() {
+  local prompt="$1"
+  local value=""
+
+  if [ -c /dev/tty ]; then
+    printf '%s' "$prompt" > /dev/tty
+    stty -echo < /dev/tty
+    IFS= read -r value < /dev/tty || value=""
+    stty echo < /dev/tty
+    printf '\n' > /dev/tty
+  else
+    echo "Cannot prompt for secrets without /dev/tty." >&2
+    exit 1
+  fi
+
+  printf '%s' "$value"
 }
 
 is_uefi() {
@@ -147,11 +172,60 @@ EOF
   fi
 }
 
+write_andared_connection() {
+  local username="$1"
+  local password="$2"
+  local profile_dir="$target_root/etc/NetworkManager/system-connections"
+  local profile_path="$profile_dir/Andared_Corporativo-installed.nmconnection"
+  local old_umask
+
+  mkdir -p "$profile_dir"
+  old_umask="$(umask)"
+  umask 077
+
+  cat > "$profile_path" <<EOF
+[connection]
+id=Andared_Corporativo (instalado)
+uuid=dcf7cfd0-02f7-4df9-8a15-f51cbeb15566
+type=wifi
+permissions=
+autoconnect=true
+autoconnect-priority=10
+
+[wifi]
+mode=infrastructure
+ssid=Andared_Corporativo
+
+[wifi-security]
+key-mgmt=wpa-eap
+
+[802-1x]
+eap=ttls;
+identity=$username
+password=$password
+phase2-auth=gtc
+system-ca-certs=false
+
+[ipv4]
+method=auto
+
+[ipv6]
+addr-gen-mode=default
+method=auto
+EOF
+
+  chmod 600 "$profile_path"
+  umask "$old_umask"
+}
+
 main() {
   require_root
 
   local disk=""
   local force=0
+  local andared_username=""
+  local andared_password=""
+  local no_andared=0
 
   while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -166,6 +240,26 @@ main() {
         fi
         swap_size="$2"
         shift 2
+        ;;
+      --andared-username)
+        if [ "$#" -lt 2 ]; then
+          echo "Missing value for --andared-username." >&2
+          exit 1
+        fi
+        andared_username="$2"
+        shift 2
+        ;;
+      --andared-password)
+        if [ "$#" -lt 2 ]; then
+          echo "Missing value for --andared-password." >&2
+          exit 1
+        fi
+        andared_password="$2"
+        shift 2
+        ;;
+      --no-andared)
+        no_andared=1
+        shift
         ;;
       -h|--help)
         usage
@@ -183,6 +277,36 @@ main() {
         ;;
     esac
   done
+
+  if { [ -n "$andared_username" ] && [ -z "$andared_password" ]; } || { [ -z "$andared_username" ] && [ -n "$andared_password" ]; }; then
+    echo "Provide both --andared-username and --andared-password together." >&2
+    exit 1
+  fi
+
+  if [ "$no_andared" -eq 0 ] && [ -z "$andared_username" ]; then
+    if [ -c /dev/tty ]; then
+      printf '\n' > /dev/tty
+      printf '┌─────────────────────────────────────────────────────┐\n' > /dev/tty
+      printf '│  Andared_Corporativo — Wi-Fi del centro educativo   │\n' > /dev/tty
+      printf '│                                                     │\n' > /dev/tty
+      printf '│  Introduce tu usuario y contraseña para dejar la    │\n' > /dev/tty
+      printf '│  conexión configurada. Pulsa Enter para omitir.     │\n' > /dev/tty
+      printf '└─────────────────────────────────────────────────────┘\n' > /dev/tty
+      printf '\n' > /dev/tty
+      printf 'Usuario Andared: ' > /dev/tty
+      IFS= read -r andared_username < /dev/tty || andared_username=""
+
+      if [ -n "$andared_username" ]; then
+        andared_password="$(prompt_secret 'Contraseña Andared: ')"
+        if [ -z "$andared_password" ]; then
+          echo "Se ha introducido un usuario pero no una contraseña. Abortando." >&2
+          exit 1
+        fi
+      fi
+    else
+      echo "Nota: no se pueden pedir credenciales Andared sin /dev/tty. Omitiendo." >&2
+    fi
+  fi
 
   if [ -z "$disk" ] || [ ! -b "$disk" ]; then
     usage
@@ -224,6 +348,11 @@ main() {
 
   echo "Installing NixOS from flake $flake_host..."
   nixos-install --no-root-passwd --flake "path:$repo_dir#$flake_host"
+
+  if [ -n "$andared_username" ] && [ -n "$andared_password" ]; then
+    echo "Writing Andared Wi-Fi credentials to the installed system..."
+    write_andared_connection "$andared_username" "$andared_password"
+  fi
 
   echo
   echo "Installation complete."
