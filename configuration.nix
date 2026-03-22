@@ -130,6 +130,26 @@ in
         method=auto
       '';
     };
+
+    "xdg/user-dirs.defaults".text = ''
+      DESKTOP=Escritorio
+      DOWNLOAD=Descargas
+      DOCUMENTS=Documentos
+      MUSIC=Música
+      PICTURES=Imágenes
+      VIDEOS=Vídeos
+      TEMPLATES=Plantillas
+      PUBLICSHARE=Público
+    '';
+
+    "xdg/autostart/xdg-user-dirs.desktop".text = ''
+      [Desktop Entry]
+      Type=Application
+      Name=Update XDG user dirs
+      Exec=${pkgs.xdg-user-dirs}/bin/xdg-user-dirs-update
+      NoDisplay=true
+      X-KDE-autostart-phase=1
+    '';
   };
 
   # todo: this doesnt actually work so we might just configure it thru kde
@@ -139,18 +159,6 @@ in
   };
 
   services.pipewire.enable = true;
-
-  # create standard user folders
-  systemd.tmpfiles.rules = [
-    "d ${homeDir}/Escritorio 0755 ${username} users -"
-    "d ${homeDir}/Descargas 0755 ${username} users -"
-    "d ${homeDir}/Documentos 0755 ${username} users -"
-    "d ${homeDir}/Imágenes 0755 ${username} users -"
-    "d ${homeDir}/Música 0755 ${username} users -"
-    "d ${homeDir}/Vídeos 0755 ${username} users -"
-    "d ${homeDir}/Público 0755 ${username} users -"
-    "d ${homeDir}/Plantillas 0755 ${username} users -"
-  ];
 
   # using rootless docker to avoid literally giving out root access
   virtualisation.docker = {
