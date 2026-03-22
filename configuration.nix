@@ -132,11 +132,6 @@ in
     };
   };
 
-  xdg.userDirs = {
-    enable = true;
-    createDirectories = true;
-  };
-  
   # todo: this doesnt actually work so we might just configure it thru kde
   services.logind.settings.Login = {
     IdleAction = "poweroff";
@@ -144,6 +139,18 @@ in
   };
 
   services.pipewire.enable = true;
+
+  # create standard user folders
+  systemd.tmpfiles.rules = [
+    "d ${homeDir}/Escritorio 0755 ${username} users -"
+    "d ${homeDir}/Descargas 0755 ${username} users -"
+    "d ${homeDir}/Documentos 0755 ${username} users -"
+    "d ${homeDir}/Imágenes 0755 ${username} users -"
+    "d ${homeDir}/Música 0755 ${username} users -"
+    "d ${homeDir}/Vídeos 0755 ${username} users -"
+    "d ${homeDir}/Público 0755 ${username} users -"
+    "d ${homeDir}/Plantillas 0755 ${username} users -"
+  ];
 
   # using rootless docker to avoid literally giving out root access
   virtualisation.docker = {
