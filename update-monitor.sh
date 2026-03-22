@@ -25,12 +25,14 @@ is_pid_alive() {
 }
 
 active_pid() {
+  init_paths
   if [ -r "$active_pid_file" ]; then
     head -n 1 "$active_pid_file" 2>/dev/null || true
   fi
 }
 
 active_log() {
+  init_paths
   local log=""
 
   if [ -r "$active_log_file" ]; then
@@ -45,6 +47,7 @@ active_log() {
 }
 
 latest_log() {
+  init_paths
   local log=""
 
   if [ -L "$latest_log_link" ] && [ -e "$latest_log_link" ]; then
@@ -64,6 +67,7 @@ latest_log() {
 }
 
 has_active_update() {
+  init_paths
   local pid
 
   pid="$(active_pid)"
