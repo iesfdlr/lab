@@ -163,6 +163,7 @@ in
     learningml-desktop
     wireshark
     andaredConnectScript
+    xdg-user-dirs
 
     # python stuff goes here
     (python314.withPackages (ps: with ps; [
