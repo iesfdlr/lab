@@ -12,12 +12,14 @@ usage() {
   cat <<'EOF'
 Usage: install.sh DISK [-f|--force] [--swap-size SIZE] [--no-andared]
                        [--andared-username USER] [--andared-password PASS]
+                       [--root-password PASS]
 
 Examples:
   sudo ./install.sh /dev/nvme0n1
   sudo ./install.sh /dev/sda --swap-size 16GiB
   sudo ./install.sh /dev/sda --no-andared
   sudo ./install.sh /dev/sda --andared-username usuario --andared-password clave
+  sudo ./install.sh /dev/sda --root-password nueva-clave-root
 
 This script will erase the selected disk, partition it, format it,
 clone this repository into /etc/nixos, and install NixOS.
@@ -25,6 +27,10 @@ clone this repository into /etc/nixos, and install NixOS.
 By default the script will prompt for Andared Wi-Fi credentials.
 Press Enter on an empty username to skip.  Use --no-andared to
 suppress the prompt entirely.
+
+If a TTY is available, the installer will also offer to change the
+root password. Press Enter on an empty root password prompt to keep
+the default configured password.
 EOF
 }
 
@@ -59,6 +65,45 @@ prompt_secret() {
   fi
 
   printf '%s' "$value"
+}
+
+prompt_secret_confirm() {
+  local prompt="$1"
+  local value confirm
+
+  value="$(prompt_secret "$prompt")"
+  if [ -z "$value" ]; then
+    printf '%s' ""
+    return 0
+  fi
+
+  confirm="$(prompt_secret 'Repite la contraseña: ')"
+  if [ "$value" != "$confirm" ]; then
+    echo "Las contraseñas no coinciden." >&2
+    exit 1
+  fi
+
+  printf '%s' "$value"
+}
+
+hash_password() {
+  local password="$1"
+
+  if command -v openssl >/dev/null 2>&1; then
+    printf '%s' "$password" | openssl passwd -6 -stdin
+    return 0
+  fi
+
+  echo "openssl is required to hash the root password during installation." >&2
+  exit 1
+}
+
+set_installed_root_password() {
+  local password="$1"
+  local password_hash
+
+  password_hash="$(hash_password "$password")"
+  printf 'root:%s\n' "$password_hash" | chpasswd -e -R "$target_root"
 }
 
 is_uefi() {
@@ -226,6 +271,7 @@ main() {
   local andared_username=""
   local andared_password=""
   local no_andared=0
+  local root_password=""
 
   while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -261,6 +307,14 @@ main() {
         no_andared=1
         shift
         ;;
+      --root-password)
+        if [ "$#" -lt 2 ]; then
+          echo "Missing value for --root-password." >&2
+          exit 1
+        fi
+        root_password="$2"
+        shift 2
+        ;;
       -h|--help)
         usage
         exit 0
@@ -281,6 +335,10 @@ main() {
   if { [ -n "$andared_username" ] && [ -z "$andared_password" ]; } || { [ -z "$andared_username" ] && [ -n "$andared_password" ]; }; then
     echo "Provide both --andared-username and --andared-password together." >&2
     exit 1
+  fi
+
+  if [ -n "$root_password" ]; then
+    echo "Warning: --root-password may be visible in shell history." >&2
   fi
 
   if [ "$no_andared" -eq 0 ] && [ -z "$andared_username" ]; then
@@ -330,6 +388,11 @@ main() {
     fi
   fi
 
+  if [ -z "$root_password" ] && [ -c /dev/tty ]; then
+    printf '\n' > /dev/tty
+    root_password="$(prompt_secret_confirm 'Contraseña root (Enter para mantener la predeterminada): ')"
+  fi
+
   cleanup_mounts
   partition_disk "$disk"
   format_and_mount "$disk"
@@ -352,6 +415,11 @@ main() {
   if [ -n "$andared_username" ] && [ -n "$andared_password" ]; then
     echo "Writing Andared Wi-Fi credentials to the installed system..."
     write_andared_connection "$andared_username" "$andared_password"
+  fi
+
+  if [ -n "$root_password" ]; then
+    echo "Setting custom root password in the installed system..."
+    set_installed_root_password "$root_password"
   fi
 
   echo

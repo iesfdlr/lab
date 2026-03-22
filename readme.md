@@ -7,7 +7,7 @@ Si el equipo que usas para instalar necesita Wi‑Fi corporativa antes de clonar
 1. descarga la iso de [nixos mínima](https://nixos.org/download/#nixos-iso) y arranca el ordenador desde ella
 2. busca el disco duro en `lsblk`
 3. `curl -fsSL https://raw.githubusercontent.com/iesfdlr/lab/main/install.sh | bash -s -- /dev/sda` (reemplaza `/dev/sda` por el disco duro que corresponda)
-4. sigue las instrucciones en pantalla — el instalador pedirá las credenciales de Andared automáticamente. Pulsa Enter sin escribir nada para omitir este paso.
+4. sigue las instrucciones en pantalla — el instalador pedirá las credenciales de Andared automáticamente y también te dará la opción de cambiar la contraseña de `root`. Pulsa Enter sin escribir nada para omitir cualquiera de esos pasos.
 
 Para máquinas que no necesitan `Andared_Corporativo`, pasa `--no-andared` para omitir el mensaje directamente:
 
@@ -19,6 +19,12 @@ También es posible pasar las credenciales por línea de comandos para automatiz
 
 ```
 curl -fsSL ... | bash -s -- /dev/sda --andared-username USUARIO --andared-password CLAVE
+```
+
+También se puede fijar la contraseña de `root` por línea de comandos para instalaciones automatizadas:
+
+```
+curl -fsSL ... | bash -s -- /dev/sda --root-password CLAVE_ROOT
 ```
 
 ## andared_corporativo
