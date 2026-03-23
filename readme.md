@@ -49,3 +49,11 @@ La configuración habilita `Flatpak` y deja `Flathub` configurado automáticamen
 - El usuario `usuario` puede abrir `Discover`, buscar una aplicación y pulsar `Instalar`.
 - Las aplicaciones instaladas así quedan fuera de NixOS declarativo y se guardan en el perfil Flatpak del propio usuario.
 - Si se quiere revisar lo instalado por esa vía, se puede usar `flatpak list --user` o abrir la pestaña de instaladas en `Discover`.
+
+### protección contra duplicados
+
+El sistema evita que haya aplicaciones duplicadas (una instalada por Nix y otra por Flatpak) usando un **filtro nativo de Flatpak** en el remoto de Flathub:
+
+- Las apps que ya se instalan por Nix (Chromium, Firefox, VS Code, GIMP, LibreOffice, etc.) están bloqueadas a nivel de catálogo de Flathub. No aparecen en Discover ni se pueden instalar por CLI.
+- El filtro se aplica en cada arranque mediante `flatpak remote-modify --filter=...`, así que se actualiza automáticamente cuando cambia `configuration.nix`.
+- Para añadir o quitar apps bloqueadas, editar la lista `blockedFlatpakIds` en `configuration.nix`.

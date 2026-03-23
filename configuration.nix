@@ -6,6 +6,31 @@ let
   andaredConnectScript = pkgs.writeShellScriptBin "andared-connect" (builtins.readFile ./andared-connect.sh);
   labUpdateMonitor = pkgs.writeShellScriptBin "lab-update-monitor" (builtins.readFile ./update-monitor.sh);
   labUpdateLauncher = pkgs.writeShellScriptBin "lab-update-launcher" (builtins.readFile ./update-launcher.sh);
+  # flatpak app IDs that overlap with nix-installed packages — blocked from
+  # being installed via Flatpak (both CLI and Discover) using a remote filter.
+  blockedFlatpakIds = [
+    "org.chromium.Chromium"
+    "com.google.Chrome"
+    "org.mozilla.firefox"
+    "com.visualstudio.code"
+    "com.vscodium.codium"
+    "com.jetbrains.PyCharm-Community"
+    "com.jetbrains.PyCharm-Professional"
+    "com.jetbrains.DataGrip"
+    "org.kde.kdenlive"
+    "com.getpostman.Postman"
+    "org.gimp.GIMP"
+    "org.freecad.FreeCAD"
+    "org.freecadweb.FreeCAD"
+    "cc.arduino.IDE2"
+    "cc.arduino.arduinoide"
+    "org.wireshark.Wireshark"
+    "org.libreoffice.LibreOffice"
+  ];
+
+  flathubFilter = pkgs.writeText "lab-flathub.filter" (
+    lib.concatMapStringsSep "\n" (id: "deny ${id}") blockedFlatpakIds + "\n"
+  );
   labUpdateDesktop = pkgs.makeDesktopItem {
     name = "lab-updates";
     desktopName = "Actualizaciones de la distribución";
@@ -385,7 +410,7 @@ in
   };
 
   systemd.services.flatpak-flathub-user = {
-    description = "configura Flathub para el usuario";
+    description = "configura Flathub para el usuario con filtro de apps duplicadas";
     after = [ "network-online.target" ];
     wants = [ "network-online.target" ];
     wantedBy = [ "multi-user.target" ];
@@ -393,7 +418,10 @@ in
       Type = "oneshot";
       User = username;
       Environment = "HOME=/home/${username}";
-      ExecStart = "${pkgs.flatpak}/bin/flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo";
     };
+    script = ''
+      ${pkgs.flatpak}/bin/flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+      ${pkgs.flatpak}/bin/flatpak remote-modify --user --filter=${flathubFilter} flathub
+    '';
   };
 }
