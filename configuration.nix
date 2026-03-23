@@ -384,14 +384,16 @@ in
     };
   };
 
-  systemd.services.flatpak-flathub = {
-    description = "configura Flathub para Flatpak";
+  systemd.services.flatpak-flathub-user = {
+    description = "configura Flathub para el usuario";
     after = [ "network-online.target" ];
     wants = [ "network-online.target" ];
     wantedBy = [ "multi-user.target" ];
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = "${pkgs.flatpak}/bin/flatpak remote-add --system --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo";
+      User = username;
+      Environment = "HOME=/home/${username}";
+      ExecStart = "${pkgs.flatpak}/bin/flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo";
     };
   };
 }
