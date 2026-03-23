@@ -31,6 +31,7 @@ let
   flathubFilter = pkgs.writeText "lab-flathub.filter" (
     lib.concatMapStringsSep "\n" (id: "deny ${id}") blockedFlatpakIds + "\n"
   );
+  flatpakNixMigrate = pkgs.writeShellScriptBin "flatpak-nix-migrate" (builtins.readFile ./flatpak-nix-migrate.sh);
   labUpdateDesktop = pkgs.makeDesktopItem {
     name = "lab-updates";
     desktopName = "Actualizaciones de la distribución";
@@ -269,6 +270,7 @@ in
     labUpdateMonitor
     labUpdateLauncher
     labUpdateDesktop
+    flatpakNixMigrate
     xdg-user-dirs
     libnotify
     util-linux
