@@ -1,5 +1,5 @@
 {
-  description = "Config Lab Ordenadores [REDACTED]";
+  description = "Config Lab Ordenadores";
 
   inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
