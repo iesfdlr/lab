@@ -41,3 +41,11 @@ El sistema instalado deja preparada una conexión de NetworkManager para `Andare
 - En el menú de aplicaciones de Plasma aparece `Actualizaciones de la distribución`.
 - Si ya hay una actualización en marcha, el lanzador se engancha automáticamente a su registro activo.
 - Si no hay ninguna en curso, el lanzador permite iniciar una nueva actualización y seguir el registro, ver el último registro o abrir la carpeta con el historial.
+
+## instalar programas manualmente
+
+La configuración habilita `Flatpak` a nivel de sistema y deja `Flathub` configurado automáticamente en el arranque. En Plasma, eso hace que `Discover` quede disponible como tienda gráfica para instalar aplicaciones sin tocar la configuración declarativa.
+
+- El usuario `usuario` puede abrir `Discover`, buscar una aplicación y pulsar `Instalar`.
+- Las aplicaciones instaladas así quedan fuera de NixOS declarativo: son cómodas para alumnado o personal no técnico, pero no quedan reflejadas en `configuration.nix`.
+- Si se quiere revisar lo instalado por esa vía, se puede usar `flatpak list` o abrir la pestaña de instaladas en `Discover`.

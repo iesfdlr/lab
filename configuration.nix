@@ -84,6 +84,7 @@ in
   services.displayManager.defaultSession = "plasmax11";
   services.displayManager.sddm.wayland.enable = false;
   services.desktopManager.plasma6.enable = true;
+  services.flatpak.enable = true;
 
   services.xserver.displayManager.sessionCommands = ''
     # disable heavy effects
@@ -380,6 +381,17 @@ in
     serviceConfig = {
       Type = "oneshot";
       ExecStart = "${pkgs.findutils}/bin/find /home/usuario/Descargas -mindepth 1 -mtime +14 -delete";
+    };
+  };
+
+  systemd.services.flatpak-flathub = {
+    description = "configura Flathub para Flatpak";
+    after = [ "network-online.target" ];
+    wants = [ "network-online.target" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${pkgs.flatpak}/bin/flatpak remote-add --system --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo";
     };
   };
 }
