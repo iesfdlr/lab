@@ -1,4 +1,4 @@
-# configuración lab ordenadores [REDACTED]
+# configuración lab ordenadores
 
 ## instalación
 
