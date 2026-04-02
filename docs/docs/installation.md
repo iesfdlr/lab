@@ -28,10 +28,6 @@ curl -fsSL https://raw.githubusercontent.com/iesfdlr/lab/main/install.sh \
 
 All flags are appended after the drive argument.
 
-## Options
-
-All flags are appended after the drive argument.
-
 === "Skip Andared"
 
     For machines that don't need `Andared_Corporativo`:
