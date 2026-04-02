@@ -42,7 +42,7 @@ All flags are appended after the drive argument.
     Pass credentials and root password directly for unattended installs:
 
     !!! warning
-        These values will be visible in your shell history.
+        These values will be visible in your shell history, but this is on a live environment so it's not a big deal.
 
     ```sh
     curl -fsSL https://raw.githubusercontent.com/iesfdlr/lab/main/install.sh \
