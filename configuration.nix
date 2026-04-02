@@ -6,7 +6,7 @@ let
   andaredConnectScript = pkgs.writeShellScriptBin "andared-connect" (builtins.readFile ./andared-connect.sh);
   labUpdateMonitor = pkgs.writeShellScriptBin "lab-update-monitor" (builtins.readFile ./update-monitor.sh);
   labUpdateLauncher = pkgs.writeShellScriptBin "lab-update-launcher" (builtins.readFile ./update-launcher.sh);
-  # flatpak app IDs that overlap with nix-installed packages — blocked from
+  # flatpak app IDs that overlap with nix-installed packages - blocked from
   # being installed via Flatpak (both CLI and Discover) using a remote filter.
   blockedFlatpakIds = [
     "org.chromium.Chromium"
@@ -356,7 +356,6 @@ in
   # sticky bit (1) + root ownership means the user can create/delete their OWN
   # files inside, but cannot delete or rename the directory itself.
   # source: https://unix.stackexchange.com/questions/20104 (sticky bit approach)
-  #         man tmpfiles.d (systemd-tmpfiles rule format)
   systemd.tmpfiles.rules =
     let
       # "d" = create directory, 1770 = rwxrwx--- + sticky bit

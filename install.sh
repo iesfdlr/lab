@@ -344,7 +344,7 @@ main() {
     if [ -c /dev/tty ]; then
       printf '\n' > /dev/tty
       printf '┌─────────────────────────────────────────────────────┐\n' > /dev/tty
-      printf '│  Andared_Corporativo — Wi-Fi del centro educativo   │\n' > /dev/tty
+      printf '│  Andared_Corporativo - Wi-Fi del centro educativo   │\n' > /dev/tty
       printf '│                                                     │\n' > /dev/tty
       printf '│  Introduce tu usuario y contraseña para dejar la    │\n' > /dev/tty
       printf '│  conexión configurada. Pulsa Enter para omitir.     │\n' > /dev/tty
