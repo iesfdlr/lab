@@ -3,6 +3,9 @@
 !!! tip "Connectivity"
     A wired connection is recommended. If you need Wi-Fi, the NixOS GNOME ISO supports **Andared_Corporativo** - see the [Wi-Fi setup](#connecting-to-andared_corporativo) section below.
 
+!!! warning
+    shipwrights! please scroll down to the [options](#options) section and run the installer with `--no-andared`, since you're probably not able to use the `Andared_Corporativo` network.
+
 Unlike most Nix configurations, this one requires a dedicated install script rather than a plain `nixos-rebuild`.
 
 ## Steps
