@@ -2,6 +2,11 @@
 
 let
   username = "usuario";
+  hasHardwareConfiguration = builtins.pathExists ./hardware-configuration.nix;
+  hasInstallLocal = builtins.pathExists ./install-local.nix;
+  missingLocalFiles =
+    lib.optional (!hasHardwareConfiguration) "./hardware-configuration.nix"
+    ++ lib.optional (!hasInstallLocal) "./install-local.nix";
   learningml-desktop = pkgs.callPackage ./pkgs/learningml-desktop.nix { };
   andaredConnectScript = pkgs.writeShellScriptBin "andared-connect" (builtins.readFile ./andared-connect.sh);
   labUpdateMonitor = pkgs.writeShellScriptBin "lab-update-monitor" (builtins.readFile ./update-monitor.sh);
@@ -44,30 +49,40 @@ let
 in
 {
   imports =
-    lib.optionals (builtins.pathExists ./hardware-configuration.nix) [
+    lib.optionals hasHardwareConfiguration [
       ./hardware-configuration.nix
     ]
-    ++ lib.optionals (builtins.pathExists ./install-local.nix) [
+    ++ lib.optionals hasInstallLocal [
       ./install-local.nix
     ]
     ++ [
       (import ./locale-es.nix { inherit lib username; })
     ];
 
-  assertions = [
-    {
-      assertion = builtins.pathExists ./hardware-configuration.nix;
-      message = ''
-        Missing ./hardware-configuration.nix.
+  system.activationScripts.requireLocalInstallFiles =
+    lib.mkIf (missingLocalFiles != [ ]) {
+      text = ''
+        cat >&2 <<'EOF'
+        Missing generated local install files:
+${lib.concatMapStringsSep "\n" (file: "          - ${file}") missingLocalFiles}
 
-        Generate it on the target machine with:
+        Run ./install.sh on the target machine so it can generate hardware and
+        boot-loader settings for that machine.
+
+        For manual recovery, generate the hardware file with:
           sudo nixos-generate-config --show-hardware-config > hardware-configuration.nix
-
-        Then rebuild with:
-          sudo nixos-rebuild switch --flake .#
+        EOF
+        exit 1
       '';
-    }
-  ];
+    };
+
+  # Lets reviewers evaluate the flake without a machine-specific generated file.
+  # Real installs still stop in the activation script above until the installer
+  # writes hardware-configuration.nix for the target machine.
+  fileSystems."/" = lib.mkIf (!hasHardwareConfiguration) {
+    device = lib.mkDefault "tmpfs";
+    fsType = lib.mkDefault "tmpfs";
+  };
 
   system.stateVersion = "25.11";
   nixpkgs.config.allowUnfree = true;
@@ -94,6 +109,7 @@ in
     ];
     # hide bootloader menu (can still be accessed by holding shift during boot)
     loader.timeout = 0;
+    loader.grub.devices = lib.mkDefault (lib.optionals (!hasInstallLocal) [ "nodev" ]);
   };
 
   # networking

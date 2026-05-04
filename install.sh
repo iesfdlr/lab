@@ -209,7 +209,7 @@ EOF
 {
   boot.loader.grub = {
     enable = true;
-    device = "$disk";
+    devices = [ "$disk" ];
   };
 }
 EOF
