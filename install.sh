@@ -93,6 +93,11 @@ hash_password() {
     return 0
   fi
 
+  if command -v nix-shell >/dev/null 2>&1; then
+    printf '%s' "$password" | nix-shell -p openssl --run 'openssl passwd -6 -stdin'
+    return 0
+  fi
+
   echo "openssl is required to hash the root password during installation." >&2
   exit 1
 }

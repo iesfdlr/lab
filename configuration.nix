@@ -122,7 +122,7 @@ ${lib.concatMapStringsSep "\n" (file: "          - ${file}") missingLocalFiles}
   # BELOW IS THE KDE PLASMA CONFIG ZONE
   services.xserver.enable = true;
   services.displayManager.sddm.enable = true;
-  services.displayManager.defaultSession = "plasmax11";
+  services.displayManager.defaultSession = "plasma";
   services.displayManager.sddm.wayland.enable = false;
   services.desktopManager.plasma6.enable = true;
   services.flatpak.enable = true;
