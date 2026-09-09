@@ -119,15 +119,57 @@ start_update_and_watch() {
   pkexec /etc/nixos/update.sh
 }
 
+list_branches() {
+  local repo_dir="/etc/nixos"
+
+  if [ ! -d "$repo_dir/.git" ]; then
+    echo "No se ha encontrado el repositorio en $repo_dir." >&2
+    return 1
+  fi
+
+  git -C "$repo_dir" fetch --all --prune >/dev/null 2>&1 || true
+  git -C "$repo_dir" for-each-ref --format='%(refname:short)' refs/remotes/origin \
+    | sed 's#^origin/##' \
+    | grep -v '^HEAD$'
+}
+
+switch_branch() {
+  local branch="$1"
+
+  if [ -z "$branch" ]; then
+    echo "Debes indicar el nombre de la rama." >&2
+    exit 1
+  fi
+
+  if has_active_update; then
+    echo "Ya hay una actualizacion en marcha; no se puede cambiar de rama ahora." >&2
+    watch_log
+    return 0
+  fi
+
+  if ! command -v pkexec >/dev/null 2>&1; then
+    echo "No se ha encontrado pkexec para cambiar de rama." >&2
+    exit 1
+  fi
+
+  echo "Solicitando permisos de administrador para cambiar a la rama '$branch'..."
+
+  # Same pattern as start_update_and_watch: pkexec runs update.sh in the
+  # foreground so its output streams straight to this terminal/log.
+  pkexec /etc/nixos/update.sh --branch "$branch"
+}
+
 usage() {
   cat <<'EOF'
-Uso: lab-update-monitor [--watch|--run|--run-or-watch|--has-active-update|--print-log-dir]
+Uso: lab-update-monitor [--watch|--run|--run-or-watch|--has-active-update|--print-log-dir|--list-branches|--switch-branch NOMBRE]
 
   --watch             Sigue la actualizacion en curso o el ultimo registro disponible.
   --run               Inicia una actualizacion con permisos de administrador y sigue su registro.
   --run-or-watch      Si hay una actualizacion activa, se engancha a ella; si no, inicia una.
   --has-active-update Sale con codigo 0 si hay una actualizacion activa.
   --print-log-dir     Muestra la carpeta de registros.
+  --list-branches     Lista las ramas disponibles en el repositorio remoto.
+  --switch-branch     Cambia a la rama indicada con permisos de administrador.
 EOF
 }
 
@@ -153,6 +195,12 @@ main() {
       ;;
     --print-log-dir)
       printf '%s\n' "$log_dir"
+      ;;
+    --list-branches)
+      list_branches
+      ;;
+    --switch-branch)
+      switch_branch "${2:-}"
       ;;
     --help|-h)
       usage

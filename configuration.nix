@@ -156,6 +156,13 @@ ${lib.concatMapStringsSep "\n" (file: "          - ${file}") missingLocalFiles}
       kcm_wallpaper=false
     '';
 
+    # disable "restore previous session" so windows don't reopen after a
+    # reboot/logout, and lock it so users can't re-enable it themselves
+    "xdg/ksmserverrc".text = ''
+      [General][$i]
+      loginMode=default
+    '';
+
     # andared_corporativo network manager settings
     "NetworkManager/system-connections/Andared_Corporativo.nmconnection" = {
       mode = "0600";

@@ -55,6 +55,19 @@ All flags are appended after the drive argument.
           --root-password ROOT_PASS
     ```
 
+=== "Install from another branch"
+
+    By default the installer clones the repository's default branch. To
+    install from a different branch (e.g. a testing branch) instead:
+
+    ```sh
+    curl -fsSL https://raw.githubusercontent.com/iesfdlr/lab/main/install.sh \
+      | bash -s -- /dev/sda --branch testing
+    ```
+
+    You can also switch branches later, after installation, from the
+    "Lab Update Monitor" application - see [Updates](updates.md#switching-branches).
+
 ---
 
 ## Connecting to Andared_Corporativo

@@ -7,12 +7,13 @@ flake_host="nixos"
 target_root="/mnt"
 repo_dir="$target_root/etc/nixos"
 swap_size="4GiB"
+repo_branch=""
 
 usage() {
   cat <<'EOF'
 Usage: install.sh DISK [-f|--force] [--swap-size SIZE] [--no-andared]
                        [--andared-username USER] [--andared-password PASS]
-                       [--root-password PASS]
+                       [--root-password PASS] [--branch NAME]
 
 Examples:
   sudo ./install.sh /dev/nvme0n1
@@ -20,6 +21,7 @@ Examples:
   sudo ./install.sh /dev/sda --no-andared
   sudo ./install.sh /dev/sda --andared-username usuario --andared-password clave
   sudo ./install.sh /dev/sda --root-password nueva-clave-root
+  sudo ./install.sh /dev/sda --branch testing
 
 This script will erase the selected disk, partition it, format it,
 clone this repository into /etc/nixos, and install NixOS.
@@ -30,6 +32,11 @@ suppress the prompt entirely.
 
 If a TTY is available, the installer will prompt you to set a root
 password. You must provide a root password to proceed with installation.
+
+By default the script clones the repository's default branch. Use
+--branch to install from a different branch instead (e.g. a testing
+branch); the "Lab Update Monitor" application can also switch branches
+after installation.
 EOF
 }
 
@@ -319,6 +326,14 @@ main() {
         root_password="$2"
         shift 2
         ;;
+      --branch)
+        if [ "$#" -lt 2 ]; then
+          echo "Missing value for --branch." >&2
+          exit 1
+        fi
+        repo_branch="$2"
+        shift 2
+        ;;
       -h|--help)
         usage
         exit 0
@@ -339,6 +354,15 @@ main() {
   if { [ -n "$andared_username" ] && [ -z "$andared_password" ]; } || { [ -z "$andared_username" ] && [ -n "$andared_password" ]; }; then
     echo "Provide both --andared-username and --andared-password together." >&2
     exit 1
+  fi
+
+  if [ -n "$repo_branch" ]; then
+    case "$repo_branch" in
+      *[!A-Za-z0-9._/-]*|"")
+        echo "Invalid branch name: $repo_branch" >&2
+        exit 1
+        ;;
+    esac
   fi
 
   if [ -n "$root_password" ]; then
@@ -413,7 +437,11 @@ main() {
   fi
 
   echo "Cloning repository into $repo_dir..."
-  run_git clone "$repo_url" "$repo_dir"
+  if [ -n "$repo_branch" ]; then
+    run_git clone --branch "$repo_branch" "$repo_url" "$repo_dir"
+  else
+    run_git clone "$repo_url" "$repo_dir"
+  fi
 
   echo "Generating machine-specific configuration..."
   nixos-generate-config --root "$target_root" --show-hardware-config > "$repo_dir/hardware-configuration.nix"

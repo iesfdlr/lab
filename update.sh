@@ -5,17 +5,36 @@ set -euo pipefail
 cd /etc/nixos
 
 force_update=0
-for arg in "$@"; do
-  case "$arg" in
+target_branch=""
+while [ "$#" -gt 0 ]; do
+  case "$1" in
     --force-update|-f)
       force_update=1
+      shift
+      ;;
+    --branch)
+      if [ "$#" -lt 2 ]; then
+        echo "Falta el valor de --branch." >&2
+        exit 1
+      fi
+      target_branch="$2"
+      shift 2
       ;;
     *)
-      echo "Uso: $0 [--force-update|-f]" >&2
+      echo "Uso: $0 [--force-update|-f] [--branch NOMBRE]" >&2
       exit 1
       ;;
   esac
 done
+
+if [ -n "$target_branch" ]; then
+  case "$target_branch" in
+    *[!A-Za-z0-9._/-]*|"")
+      echo "Nombre de rama no valido: $target_branch" >&2
+      exit 1
+      ;;
+  esac
+fi
 
 log_dir="/var/log/lab-updates"
 mkdir -p "$log_dir" 2>/dev/null || log_dir="${XDG_STATE_HOME:-$HOME/.local/state}/lab-updates"
@@ -156,7 +175,25 @@ echo "Actualizando el sistema..."
 echo "Guardando registro en: $log_file"
 
 old_rev="$(git rev-parse HEAD)"
-git pull --rebase --autostash
+
+if [ -n "$target_branch" ]; then
+  echo "Cambiando a la rama '$target_branch'..."
+  git fetch --all --prune
+
+  if git show-ref --verify --quiet "refs/remotes/origin/$target_branch"; then
+    git checkout -B "$target_branch" "origin/$target_branch"
+  elif git show-ref --verify --quiet "refs/heads/$target_branch"; then
+    git checkout "$target_branch"
+  else
+    echo "La rama '$target_branch' no existe en el repositorio remoto." >&2
+    exit 1
+  fi
+
+  echo "Rama activa: $(git branch --show-current)"
+else
+  git pull --rebase --autostash
+fi
+
 new_rev="$(git rev-parse HEAD)"
 
 if [ "$old_rev" = "$new_rev" ] && [ "$force_update" -eq 0 ]; then
