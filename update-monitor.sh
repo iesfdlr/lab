@@ -121,14 +121,19 @@ start_update_and_watch() {
 
 list_branches() {
   local repo_dir="/etc/nixos"
+  # /etc/nixos is owned by root (cloned/updated as root), so git run as a
+  # regular user refuses it as "dubious ownership" unless told it's safe.
+  # Pass it as a one-off -c flag rather than writing to the user's global
+  # gitconfig, since any user on the machine may run this.
+  local -a git_opts=(-C "$repo_dir" -c "safe.directory=$repo_dir")
 
   if [ ! -d "$repo_dir/.git" ]; then
     echo "No se ha encontrado el repositorio en $repo_dir." >&2
     return 1
   fi
 
-  git -C "$repo_dir" fetch --all --prune >/dev/null 2>&1 || true
-  git -C "$repo_dir" for-each-ref --format='%(refname:short)' refs/remotes/origin \
+  git "${git_opts[@]}" fetch --all --prune >/dev/null 2>&1 || true
+  git "${git_opts[@]}" for-each-ref --format='%(refname:short)' refs/remotes/origin \
     | sed 's#^origin/##' \
     | grep -v '^HEAD$'
 }
